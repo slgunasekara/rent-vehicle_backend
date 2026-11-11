@@ -13,12 +13,10 @@ import { mailFeatured, siteUrl } from '../services/adMail.service';
 const DAY = 86_400_000;
 const md5 = (s: string): string => crypto.createHash('md5').update(s).digest('hex').toUpperCase();
 const configured = (): boolean => !!(env.payhere.merchantId && env.payhere.merchantSecret);
-/** the no-money TEST payment: only while PayHere is not set up, and not in production (unless DEMO_PAYMENTS=true) */
 const demoAllowed = (): boolean => !configured() && (env.nodeEnv !== 'production' || env.demoPayments);
 const modeNow = (): 'payhere' | 'demo' | 'off' => (configured() ? 'payhere' : demoAllowed() ? 'demo' : 'off');
 const adTitle = (v: { make: string; vehicleModel: string; year?: number }): string => `${v.make} ${v.vehicleModel}${v.year ? ' ' + v.year : ''}`;
 
-/** make the ad a Top ad for `days` more days (added after any time it still has). Used by payments and by the company console. */
 export async function extendFeatured(vehicleId: Types.ObjectId | string, days: number): Promise<Date | null> {
   const v = await Vehicle.findById(vehicleId).select('featuredUntil');
   if (!v) return null;
@@ -28,7 +26,6 @@ export async function extendFeatured(vehicleId: Types.ObjectId | string, days: n
   return until;
 }
 
-/** a payment became PAID: Top ad starts, the owner gets a receipt. Safe to call twice (PayHere may notify more than once). */
 async function applyPaid(paymentId: Types.ObjectId, payherePaymentId?: string): Promise<IPayment | null> {
   const p = await Payment.findOneAndUpdate({ _id: paymentId, status: { $ne: 'paid' } }, { $set: { status: 'paid', paidAt: new Date(), ...(payherePaymentId ? { payherePaymentId } : {}) } }, { new: true });
   if (!p) return null; // already paid before
@@ -38,10 +35,8 @@ async function applyPaid(paymentId: Types.ObjectId, payherePaymentId?: string): 
   return p;
 }
 
-// GET /api/payments/plans
 export const plans = asyncHandler(async (_req: Request, res: Response) => { res.json({ success: true, data: { plans: env.featurePlans, mode: modeNow() } }); });
 
-// POST /api/payments/featured  { vehicleId, days } -> the PayHere form to submit, or { mode: 'demo' }
 export const startFeatured = asyncHandler(async (req: Request, res: Response) => {
   const { vehicleId, days } = z.object({ vehicleId: z.string(), days: z.coerce.number() }).parse(req.body);
   const plan = env.featurePlans.find((p) => p.days === days);
@@ -77,7 +72,6 @@ export const startFeatured = asyncHandler(async (req: Request, res: Response) =>
   });
 });
 
-// POST /api/payments/payhere/notify - PayHere tells us (server to server) what happened; the signature proves it really is PayHere
 export const payhereNotify = asyncHandler(async (req: Request, res: Response) => {
   if (!configured()) throw new ApiError(404, 'Not found');
   const b = req.body as Record<string, string>;
@@ -92,7 +86,6 @@ export const payhereNotify = asyncHandler(async (req: Request, res: Response) =>
   res.status(200).send('OK');
 });
 
-// POST /api/payments/demo/confirm  { orderId } - TEST mode only: pretend the payment went through (no money moves)
 export const demoConfirm = asyncHandler(async (req: Request, res: Response) => {
   if (!demoAllowed()) throw new ApiError(403, 'Test payments are switched off');
   const { orderId } = z.object({ orderId: z.string() }).parse(req.body);
@@ -102,7 +95,6 @@ export const demoConfirm = asyncHandler(async (req: Request, res: Response) => {
   res.json({ success: true, message: 'Test payment done. The ad is a Top ad now.' });
 });
 
-// GET /api/payments/status/:orderId - the page after PayHere asks this (the notification can arrive a few seconds later)
 export const paymentStatus = asyncHandler(async (req: Request, res: Response) => {
   const p = await Payment.findOne({ orderId: req.params.orderId, user: req.user!._id });
   if (!p) throw new ApiError(404, 'Order not found');

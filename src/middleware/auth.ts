@@ -22,7 +22,6 @@ export async function protect(req: Request, _res: Response, next: NextFunction):
   }
 }
 
-/** like protect, but a visitor without a (valid) token just continues without req.user */
 export async function optionalAuth(req: Request, _res: Response, next: NextFunction): Promise<void> {
   try {
     const h = req.headers.authorization;

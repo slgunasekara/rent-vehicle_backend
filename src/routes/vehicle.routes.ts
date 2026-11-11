@@ -6,7 +6,6 @@ import * as v from '../controllers/vehicle.controller';
 const r = Router();
 r.get('/vehicles', v.searchVehicles);
 r.get('/stats/public', v.publicStats);
-// "mine" must come before "/:id"
 r.get('/vehicles/mine', protect, v.myVehicles);
 r.get('/vehicles/mine/:id', protect, v.myVehicle);
 r.post('/vehicles', protect, writeLimiter, v.createVehicle);

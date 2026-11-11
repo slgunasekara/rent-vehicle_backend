@@ -3,7 +3,6 @@ import { connectDB } from './config/db';
 import { env } from './config/env';
 import { startExpiryJob } from './services/expiry.service';
 
-// a forgotten promise (e-mail, photo clean-up) must never take the whole API down
 process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', e));
 process.on('uncaughtException', (e) => console.error('[uncaughtException]', e));
 

@@ -1,8 +1,4 @@
-/**
- * Every district of Sri Lanka with its main cities / towns.
- * The SAME file lives in frontend/src/data/locations.ts - keep the two identical.
- * A listing stores a `district` and a `city` (a city of that district).
- */
+
 export interface DistrictInfo { district: string; province: string; cities: string[] }
 
 const raw: [string, string, string][] = [
@@ -42,14 +38,11 @@ export const DISTRICTS: DistrictInfo[] = raw.map(([district, province, list]) =>
 export const PROVINCES = Array.from(new Set(DISTRICTS.map((d) => d.province)));
 export const districtNames = DISTRICTS.map((d) => d.district);
 
-/** the district a city belongs to (first match) - used when somebody types a city name only */
 export const districtOf = (city: string): string | undefined => DISTRICTS.find((d) => d.cities.some((c) => c.toLowerCase() === city.trim().toLowerCase()))?.district;
 
-/** true when `city` is a real city of `district` */
 export const isValidLocation = (district: string, city: string): boolean => {
   const d = DISTRICTS.find((x) => x.district === district);
   return !!d && d.cities.some((c) => c === city);
 };
 
-/** the exact spelling used in the list ("kandy" -> "Kandy") */
 export const canonicalCity = (district: string, city: string): string | undefined => DISTRICTS.find((x) => x.district === district)?.cities.find((c) => c.toLowerCase() === city.trim().toLowerCase());

@@ -4,7 +4,6 @@ import { engageLimiter, reportLimiter } from '../middleware/rateLimiter';
 import * as e from '../controllers/engage.controller';
 
 const r = Router();
-// the reviews list is public; everything else needs a signed-in user (stars, hearts and reports are tied to an account)
 r.get('/vehicles/:id/reviews', optionalAuth, e.reviews); // public
 r.get('/vehicles/:id/me', protect, e.mine);
 r.put('/vehicles/:id/rating', protect, engageLimiter, e.rate);

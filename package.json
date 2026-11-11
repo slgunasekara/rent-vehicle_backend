@@ -1,6 +1,6 @@
 {
   "name": "vehicle-buddy-backend",
-  "version": "7.0.0",
+  "version": "6.0.0",
   "private": true,
   "main": "dist/server.js",
   "scripts": {
