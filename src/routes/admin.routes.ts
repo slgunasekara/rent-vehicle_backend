@@ -1,0 +1,26 @@
+import { Router } from 'express';
+import { adminOnly } from '../middleware/auth';
+import * as admin from '../controllers/admin.controller';
+import { writeLimiter } from '../middleware/rateLimiter';
+import * as team from '../controllers/adminTeam.controller';
+
+const r = Router();
+r.get('/admin/stats', ...adminOnly, admin.stats);
+r.get('/admin/vehicles', ...adminOnly, admin.listVehicles);
+r.delete('/admin/vehicles/:id', ...adminOnly, admin.deleteVehicle);
+r.get('/admin/reports/open-count', ...adminOnly, admin.openReportCount);
+r.get('/admin/reports', ...adminOnly, admin.listReports);
+r.patch('/admin/reports/:id', ...adminOnly, admin.updateReport);
+r.delete('/admin/reports/:id', ...adminOnly, admin.deleteReport);
+r.get('/admin/admins', ...adminOnly, team.listAdmins);
+r.post('/admin/admins', ...adminOnly, writeLimiter, team.createAdmin);
+r.patch('/admin/admins/:id', ...adminOnly, writeLimiter, team.updateAdmin);
+r.delete('/admin/admins/:id', ...adminOnly, writeLimiter, team.deleteAdmin);
+r.get('/admin/payments', ...adminOnly, admin.listPayments);
+r.put('/admin/vehicles/:id/featured', ...adminOnly, admin.setFeatured);
+r.patch('/admin/users/:id/ban', ...adminOnly, admin.banUser);
+r.patch('/admin/users/:id/unban', ...adminOnly, admin.unbanUser);
+r.get('/admin/users', ...adminOnly, admin.listUsers);
+r.patch('/admin/users/:id', ...adminOnly, admin.setUserActive);
+r.delete('/admin/users/:id', ...adminOnly, admin.deleteUser);
+export default r;
